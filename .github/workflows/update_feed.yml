@@ -1,0 +1,33 @@
+name: Update Pinterest Feed
+
+on:
+  schedule:
+    - cron: '0 12 * * *'  # Запускать каждый день в 12:00 UTC
+  workflow_dispatch:  # Можно запускать вручную
+
+jobs:
+  update-feed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install requests lxml
+
+      - name: Run script
+        run: python filter_feed.py
+
+      - name: Upload to Dropbox
+        uses: SamKirkland/FTP-Deploy-Action@4.3.1
+        with:
+          server: ftp.dropbox.com
+          username: ${{ secrets.DROPBOX_USER }}
+          password: ${{ secrets.DROPBOX_TOKEN }}
+          local-dir: ./
+          server-dir: /Apps/YourAppName/  # ← Замените на свою папку!
