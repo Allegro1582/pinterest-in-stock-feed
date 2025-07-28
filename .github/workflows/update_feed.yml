@@ -2,7 +2,7 @@ name: Update Pinterest Feed
 
 on:
   schedule:
-    - cron: '0 12 * * *'  # Запускать каждый день в 12:00 UTC
+    - cron: '0 1 * * *'    # 4:00 Киев (летом UTC+3, зимой UTC+2)
   workflow_dispatch:  # Можно запускать вручную
 
 jobs:
