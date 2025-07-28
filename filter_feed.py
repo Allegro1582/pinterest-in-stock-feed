@@ -1,40 +1,48 @@
 import requests
 import xml.etree.ElementTree as ET
-import datetime
+from datetime import datetime
 
-# Ссылка на ваш фид Google Merchant Center
-FEED_URL = "https://exult.ua/marketplace-integration/google-feed?langId=3"  # ← Замените на свою!
+# Конфигурация
+FEED_URL = "https://exult.ua/marketplace-integration/google-feed?langId=3"
+OUTPUT_FILE = "pinterest_in_stock_feed.xml"
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 
-# Имя выходного файла
-output_file = "pinterest_in_stock_feed.xml"
+try:
+    # Загружаем фид с заголовками (если нужна авторизация)
+    headers = {"User-Agent": USER_AGENT}
+    response = requests.get(FEED_URL, headers=headers, timeout=30)
+    response.raise_for_status()  # Проверка на ошибки HTTP
 
-# Скачиваем фид
-response = requests.get(FEED_URL)
-with open("google_merchant_feed.xml", "wb") as f:
-    f.write(response.content)
+    # Парсим XML
+    try:
+        root = ET.fromstring(response.content)
+    except ET.ParseError as e:
+        raise ValueError(f"Ошибка парсинга XML: {str(e)}")
 
-# Парсим XML
-tree = ET.parse("google_merchant_feed.xml")
-root = tree.getroot()
+    # Namespace (может отличаться! Проверьте ваш фид)
+    ns = {'g': 'http://base.google.com/ns/1.0'}
 
-# Пространство имён Google Merchant (если есть)
-ns = {'g': 'http://base.google.com/ns/1.0'}
+    # Создаем новый фид
+    new_root = ET.Element('rss', version='2.0')
+    channel = ET.SubElement(new_root, 'channel')
+    ET.SubElement(channel, 'title').text = "Pinterest Feed (In Stock)"
+    ET.SubElement(channel, 'lastBuildDate').text = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
-# Создаём новый фид
-new_root = ET.Element('rss', version='2.0')
-channel = ET.SubElement(new_root, 'channel')
+    # Фильтруем товары в наличии
+    in_stock_count = 0
+    for item in root.findall('.//item'):
+        availability = item.find('g:availability', ns)
+        if availability is not None and availability.text.lower() == 'in stock':
+            channel.append(item)
+            in_stock_count += 1
 
-# Заголовок и дата
-title = ET.SubElement(channel, 'title')
-title.text = "Pinterest Feed (In Stock Only)"
-last_build_date = ET.SubElement(channel, 'lastBuildDate')
-last_build_date.text = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+    # Сохраняем результат
+    ET.ElementTree(new_root).write(OUTPUT_FILE, encoding='utf-8', xml_declaration=True)
+    print(f"Успешно! Товаров в наличии: {in_stock_count}. Файл: {OUTPUT_FILE}")
 
-# Фильтруем товары в наличии
-for item in root.findall('.//item'):
-    availability = item.find('g:availability', ns)
-    if availability is not None and availability.text.lower() == 'in stock':
-        channel.append(item)  # Копируем в новый фид
+except Exception as e:
+    print(f"Критическая ошибка: {str(e)}")
+    sys.exit(1)
 
 # Сохраняем
 new_tree = ET.ElementTree(new_root)
