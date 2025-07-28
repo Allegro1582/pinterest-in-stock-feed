@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 import datetime
 
 # Ссылка на ваш фид Google Merchant Center
-FEED_URL = "https://ваша-ссылка-на-фид.xml"  # ← Замените на свою!
+FEED_URL = "https://exult.ua/marketplace-integration/google-feed?langId=3"  # ← Замените на свою!
 
 # Имя выходного файла
 output_file = "pinterest_in_stock_feed.xml"
