@@ -1,12 +1,20 @@
+import requests
 import xml.etree.ElementTree as ET
 import datetime
 
-# Укажите имя вашего исходного файла (если он в облаке, нужна ссылка)
-input_file = "google_merchant_feed.xml"
+# Ссылка на ваш фид Google Merchant Center
+FEED_URL = "https://ваша-ссылка-на-фид.xml"  # ← Замените на свою!
+
+# Имя выходного файла
 output_file = "pinterest_in_stock_feed.xml"
 
-# Загружаем XML
-tree = ET.parse(input_file)
+# Скачиваем фид
+response = requests.get(FEED_URL)
+with open("google_merchant_feed.xml", "wb") as f:
+    f.write(response.content)
+
+# Парсим XML
+tree = ET.parse("google_merchant_feed.xml")
 root = tree.getroot()
 
 # Пространство имён Google Merchant (если есть)
