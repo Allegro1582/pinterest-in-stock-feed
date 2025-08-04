@@ -1,3 +1,4 @@
+import sys
 import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -8,10 +9,10 @@ OUTPUT_FILE = "pinterest_in_stock_feed.xml"
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 
 try:
-    # Загружаем фид с заголовками (если нужна авторизация)
+    # Загружаем фид с заголовками
     headers = {"User-Agent": USER_AGENT}
     response = requests.get(FEED_URL, headers=headers, timeout=30)
-    response.raise_for_status()  # Проверка на ошибки HTTP
+    response.raise_for_status()
 
     # Парсим XML
     try:
@@ -19,7 +20,7 @@ try:
     except ET.ParseError as e:
         raise ValueError(f"Ошибка парсинга XML: {str(e)}")
 
-    # Namespace (может отличаться! Проверьте ваш фид)
+    # Namespace
     ns = {'g': 'http://base.google.com/ns/1.0'}
 
     # Создаем новый фид
@@ -36,16 +37,10 @@ try:
             channel.append(item)
             in_stock_count += 1
 
-    # Сохраняем результат
+    # Сохраняем результат (ОДИН раз)
     ET.ElementTree(new_root).write(OUTPUT_FILE, encoding='utf-8', xml_declaration=True)
     print(f"Успешно! Товаров в наличии: {in_stock_count}. Файл: {OUTPUT_FILE}")
 
 except Exception as e:
-    print(f"Критическая ошибка: {str(e)}")
+    print(f"Критическая ошибка: {str(e)}", file=sys.stderr)
     sys.exit(1)
-
-# Сохраняем
-new_tree = ET.ElementTree(new_root)
-new_tree.write(output_file, encoding='utf-8', xml_declaration=True)
-
-print(f"Фид с товарами в наличии сохранён в {output_file}")
