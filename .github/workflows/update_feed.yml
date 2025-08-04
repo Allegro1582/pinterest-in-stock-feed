@@ -24,10 +24,8 @@ jobs:
         run: python filter_feed.py
 
       - name: Upload to Dropbox
-        uses: SamKirkland/FTP-Deploy-Action@4.3.1
-        with:
-          server: ftp.dropbox.com
-          username: ${{ secrets.DROPBOX_USER }}
-          password: ${{ secrets.DROPBOX_TOKEN }}
-          local-dir: ./
-          server-dir: /  # ← Замените на свою папку!
+  uses: dropbox/upload-to-dropbox@v1
+  with:
+    dropbox-access-token: ${{ secrets.DROPBOX_TOKEN }}
+    local-path: './pinterest_in_stock_feed.xml'
+    dropbox-path: '/pinterest_in_stock_feed.xml'
