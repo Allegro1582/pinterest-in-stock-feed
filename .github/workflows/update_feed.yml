@@ -17,15 +17,9 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install dependencies
-        run: pip install requests lxml
-
-      - name: Run script
-        run: python filter_feed.py
-
       - name: Upload to Dropbox
-        uses: dropbox/upload-to-dropbox@v1
-        with:
-          dropbox-access-token: ${{ secrets.DROPBOX_TOKEN }}
-          local-path: './pinterest_in_stock_feed.xml'
-          dropbox-path: '/pinterest_in_stock_feed.xml'
+  uses: dropbox/upload-to-dropbox@v1.0.3
+  with:
+    dropbox-access-token: ${{ secrets.DROPBOX_TOKEN }}
+    local-path: './pinterest_in_stock_feed.xml'
+    dropbox-path: '/pinterest_in_stock_feed.xml'
