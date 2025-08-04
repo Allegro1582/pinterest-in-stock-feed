@@ -1,7 +1,9 @@
 name: Update Pinterest Feed
 
 on:
-  workflow_dispatch:
+  schedule:
+    - cron: '0 1 * * *'    # 4:00 утра по Киеву
+  workflow_dispatch:       # Ручной запуск
 
 jobs:
   update-feed:
@@ -21,19 +23,10 @@ jobs:
       - name: Run script
         run: python filter_feed.py
 
-      - name: Debug - List files
-        run: ls -la
-
-      - name: Upload to Dropbox (debug version)
+      - name: Upload to Dropbox
         run: |
-          echo "Starting Dropbox upload..."
-          echo "File exists: $(ls -la pinterest_in_stock_feed.xml)"
-          
-          RESPONSE=$(curl -s -X POST https://content.dropboxapi.com/2/files/upload \
+          curl -X POST https://content.dropboxapi.com/2/files/upload \
           -H "Authorization: Bearer ${{ secrets.DROPBOX_TOKEN }}" \
-          -H "Dropbox-API-Arg: {\"path\":\"/DEBUG_pinterest.xml\",\"mode\":\"overwrite\"}" \
+          -H "Dropbox-API-Arg: {\"path\":\"/pinterest_in_stock_feed.xml\",\"mode\":\"overwrite\"}" \
           -H "Content-Type: application/octet-stream" \
-          --data-binary @pinterest_in_stock_feed.xml)
-          
-          echo "Dropbox API response: $RESPONSE"
-          echo "Upload completed. Check your Dropbox root folder for DEBUG_pinterest.xml"
+          --data-binary @pinterest_in_stock_feed.xml
