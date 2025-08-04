@@ -24,8 +24,9 @@ jobs:
         run: python filter_feed.py
 
       - name: Upload to Dropbox
-        uses: dropbox/upload-to-dropbox@v1.0.3
-        with:
-          dropbox-access-token: ${{ secrets.DROPBOX_TOKEN }}
-          local-path: './pinterest_in_stock_feed.xml'
-          dropbox-path: '/pinterest_in_stock_feed.xml'
+        run: |
+          curl -X POST https://content.dropboxapi.com/2/files/upload \
+          -H "Authorization: Bearer ${{ secrets.DROPBOX_TOKEN }}" \
+          -H "Dropbox-API-Arg: {\"path\":\"/pinterest_in_stock_feed.xml\",\"mode\":\"overwrite\"}" \
+          -H "Content-Type: application/octet-stream" \
+          --data-binary @pinterest_in_stock_feed.xml
