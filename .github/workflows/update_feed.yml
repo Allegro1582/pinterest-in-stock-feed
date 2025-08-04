@@ -30,4 +30,4 @@ jobs:
           username: ${{ secrets.DROPBOX_USER }}
           password: ${{ secrets.DROPBOX_TOKEN }}
           local-dir: ./
-          server-dir: /Apps/YourAppName/  # ← Замените на свою папку!
+          server-dir: /  # ← Замените на свою папку!
